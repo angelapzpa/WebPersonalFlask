@@ -1,6 +1,10 @@
-from flask import Flask, render_template
+from crypt import methods
+from flask import Flask, render_template, request
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret'
 
 ######### Rutas Public ###########
 
@@ -46,7 +50,15 @@ def portfolio():
     ]
     return render_template('public/portfolio.html',projects=projects)
 
-######### Rutas #########
+################# Formularios de WTForms ###################
+
+class LoginForm(FlaskForm):
+    username = StringField('Username')
+    password = PasswordField('Password')
+    submit = SubmitField('Login')
+
+
+######### Rutas Login #########
 @app.route('/auth/login')
 def login():
     return render_template('auth/login.html')
@@ -54,6 +66,18 @@ def login():
 @app.route('/auth/register')
 def register():
     return render_template('auth/register.html')
+
+@app.route('/welcome', methods=['GET', 'POST'])
+def welcome():
+    email= request.form['mail']
+    password = request.form['password']
+    access = {'email':email, 'password':password}
+    
+    return render_template('admin/index.html', user_access= access)
+
+@app.errorhandler(404)
+def page_error_not_found(e):
+    return render_template('error/404.html'), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
